@@ -7,17 +7,21 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship,
 class Base(DeclarativeBase):
     pass
 
+
 class Node(Base):
     __tablename__ = "node_table"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50))
 
-    # connection_subject: Mapped[Optional["Connection"]] = relationship(back_populates="subject")
+    connection_subjects: Mapped[Optional["Connection"]] = relationship(back_populates="subject")
+    connection_targets: Mapped[Optional["Connection"]] = relationship(back_populates="target")
+
     # connection_target: Mapped[Optional["Connection"]] = relationship(back_populates="target")
 
     def __repr__(self):
         return f"Node(id={self.id}, name={self.name!r})"
+
 
 class Connection(Base):
     __tablename__ = "connection_table"
@@ -28,8 +32,10 @@ class Connection(Base):
     subject_id: Mapped[int] = mapped_column(ForeignKey("node_table.id"))
     target_id: Mapped[int] = mapped_column(ForeignKey("node_table.id"))
 
-    subject: Mapped["Node"] = relationship()
-    target: Mapped["Node"] = relationship()
+    subject: Mapped["Node"] = relationship(back_populates="connection_subjects")
+    target: Mapped["Node"] = relationship(back_populates="connection_targets")
+
+    # target: Mapped["Node"] = relationship()
 
     def __repr__(self):
         return f"Connection(id={self.id}, name={self.name}, subject_id={self.subject_id}, target_id={self.target_id})"
