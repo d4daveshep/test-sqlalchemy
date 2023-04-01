@@ -92,9 +92,10 @@ def test_read_connections_by_name(session_with_nodes_and_connections):
         assert "title" in conn_name
 
 def test_read_connections_by_subject(session_with_nodes_and_connections):
-    select_connection = select(Connection).where(Connection.subject.name.ilike("%andrew%"))
-    conns = session_with_nodes_and_connections.scalars(select_connection).all()
+    select_stmt = select(Connection).join(Connection.subject.and_(Node.id==Connection.subject_id).and_(Node.name.ilike("%andrew%")))
+    # select_stmt = select(Node).where(Node.name.ilike("%andrew%"))
+    conns = session_with_nodes_and_connections.scalars(select_stmt).all()
     assert len(conns) == 5
-    for conn in session_with_nodes_and_connections.scalars(select_connection):
+    for conn in session_with_nodes_and_connections.scalars(select_stmt):
         subject_name = conn.subject.name
         assert "andrew".casefold() in subject_name.casefold()
