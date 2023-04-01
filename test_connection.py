@@ -85,6 +85,16 @@ def test_fixture(session_with_nodes_and_connections):
 
 def test_read_connections_by_name(session_with_nodes_and_connections):
     select_connection = select(Connection).where(Connection.name.ilike("%title%"))
-    connections = session_with_nodes_and_connections.scalars(select_connection).all()
-    assert len(connections) == 3
+    conns = session_with_nodes_and_connections.scalars(select_connection).all()
+    assert len(conns) == 3
+    for conn in session_with_nodes_and_connections.scalars(select_connection):
+        conn_name = conn.name
+        assert "title" in conn_name
 
+def test_read_connections_by_subject(session_with_nodes_and_connections):
+    select_connection = select(Connection).where(Connection.subject.name.ilike("%andrew%"))
+    conns = session_with_nodes_and_connections.scalars(select_connection).all()
+    assert len(conns) == 5
+    for conn in session_with_nodes_and_connections.scalars(select_connection):
+        subject_name = conn.subject.name
+        assert "andrew".casefold() in subject_name.casefold()
