@@ -1,7 +1,5 @@
-from typing import Optional, List
-
-from sqlalchemy import String, ForeignKey, create_engine, select
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, Session
+from sqlalchemy import String, ForeignKey
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
@@ -27,14 +25,13 @@ class Connection(Base):
     subject_id: Mapped[int] = mapped_column(ForeignKey("node_table.id"))
     target_id: Mapped[int] = mapped_column(ForeignKey("node_table.id"))
 
-    subject: Mapped["Node"] = relationship(foreign_keys=[subject_id])  #, back_populates="connection_subjects")
-    target: Mapped["Node"] = relationship(foreign_keys=[target_id])  #, back_populates="connection_targets")
+    subject: Mapped["Node"] = relationship(foreign_keys=[subject_id])  # , back_populates="connection_subjects")
+    target: Mapped["Node"] = relationship(foreign_keys=[target_id])  # , back_populates="connection_targets")
 
     # target: Mapped["Node"] = relationship()
 
     def __repr__(self):
         return f"Connection(id={self.id}, name={self.name}, subject_id={self.subject_id}, target_id={self.target_id})"
-
 
 # class User(Base):
 #     __tablename__ = "user_account"
