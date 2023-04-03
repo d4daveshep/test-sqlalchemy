@@ -100,3 +100,46 @@ def test_read_connections_by_subject(session_with_nodes_and_connections):
     for conn in session_with_nodes_and_connections.scalars(select_stmt):
         subject_name = conn.subject.name
         assert "andrew".casefold() in subject_name.casefold()
+
+
+def test_delete_connection_doesnt_delete_node(session_with_nodes_and_connections):
+    select_connection = select(Connection).where(Connection.name.ilike("%title%"))
+    conns = session_with_nodes_and_connections.scalars(select_connection).all()
+    assert len(conns) == 3
+
+    conn = session_with_nodes_and_connections.scalars(select_connection).first()
+    subject = conn.subject
+    target = conn.target
+
+    session_with_nodes_and_connections.delete(conn)
+    session_with_nodes_and_connections.commit()
+
+    conns = session_with_nodes_and_connections.scalars(select_connection).all()
+    assert len(conns) == 2
+
+    assert session_with_nodes_and_connections.get(Node, subject.id)
+    assert session_with_nodes_and_connections.get(Node, target.id)
+
+
+
+def test_delete_node_cascades_deletes_to_connections(session_with_nodes_and_connections):
+
+    select_robins_connections = select(Connection).join(
+        Connection.subject.and_(Node.id == Connection.subject_id).and_(Node.name.ilike("%robin%")))
+    conns = session_with_nodes_and_connections.scalars(select_robins_connections).all()
+    assert len(conns) == 5
+
+    select_robin = select(Node).where(Node.name.ilike("%robin%"))
+    robin = session_with_nodes_and_connections.scalars(select_robin).one()
+    assert robin.name == "Robin Southgate"
+
+    session_with_nodes_and_connections.delete(robin)
+    session_with_nodes_and_connections.commit()
+
+    conns = session_with_nodes_and_connections.scalars(select_robins_connections).all()
+    assert len(conns) == 0
+
+    select_all_connections = select(Connection)
+    connections = session_with_nodes_and_connections.scalars(select_all_connections).all()
+    assert len(connections) == 9
+

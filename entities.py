@@ -25,8 +25,8 @@ class Connection(Base):
     subject_id: Mapped[int] = mapped_column(ForeignKey("node_table.id"))
     target_id: Mapped[int] = mapped_column(ForeignKey("node_table.id"))
 
-    subject: Mapped["Node"] = relationship(foreign_keys=[subject_id])  # , back_populates="connection_subjects")
-    target: Mapped["Node"] = relationship(foreign_keys=[target_id])  # , back_populates="connection_targets")
+    subject: Mapped["Node"] = relationship(foreign_keys=[subject_id])
+    target: Mapped["Node"] = relationship(foreign_keys=[target_id])
 
     # target: Mapped["Node"] = relationship()
 
