@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, select, delete
 from sqlalchemy.orm import Session
 
 from entities import Node, Base, Connection
@@ -121,9 +121,7 @@ def test_delete_connection_doesnt_delete_node(session_with_nodes_and_connections
     assert session_with_nodes_and_connections.get(Node, target.id)
 
 
-
 def test_delete_node_cascades_deletes_to_connections(session_with_nodes_and_connections):
-
     select_robins_connections = select(Connection).join(
         Connection.subject.and_(Node.id == Connection.subject_id).and_(Node.name.ilike("%robin%")))
     conns = session_with_nodes_and_connections.scalars(select_robins_connections).all()
@@ -138,6 +136,13 @@ def test_delete_node_cascades_deletes_to_connections(session_with_nodes_and_conn
 
     conns = session_with_nodes_and_connections.scalars(select_robins_connections).all()
     assert len(conns) == 0
+
+    delete_stmt = delete(Connection).where(Connection.subject_id == robin.id)
+    result = session_with_nodes_and_connections.execute(delete_stmt)
+    assert result.rowcount == 5
+    delete_stmt = delete(Connection).where(Connection.target_id == robin.id)
+    result = session_with_nodes_and_connections.execute(delete_stmt)
+    assert result.rowcount == 0
 
     select_all_connections = select(Connection)
     connections = session_with_nodes_and_connections.scalars(select_all_connections).all()
